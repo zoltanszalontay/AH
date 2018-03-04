@@ -1,4 +1,5 @@
 #!/usr/bin/python
+# v0.1
 import websocket
 try:
     import thread
