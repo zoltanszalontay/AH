@@ -99,3 +99,8 @@ ENV/
 .mypy_cache/
 /.idea/
 /__pycache__/
+
+# Sensitive stuff
+app_url.txt
+sensors.txt
+sqlinfo.txt
