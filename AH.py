@@ -6,19 +6,8 @@ import websocket
 import json
 import pyodbc as odbc
 
-sql = {
-    'server':   '', 
-    'database': '',
-    'table':    ''
-    }
-
-euis = {
-    "": "",
-    "": "", 
-    "": "",
-    "": "",
-    "": ""
-    }
+sql = {}    # SQL configuration (server, database, table)
+euis = {}   # Sensor ID (EUI) - Sensor type pairs
 
 class sensor_data:
     def __init__(self, time, eui, value, unit, sensor_type_id):
