@@ -130,7 +130,7 @@ if __name__ == "__main__":
         sql = json.loads(f.read())
     f.close()
 
-    # Read eui list
+    # Read EUI list
     with open('sensors.txt', 'r') as f:
         euis = json.loads(f.read())
     f.close()
