@@ -11,12 +11,13 @@ sql = {}    # SQL configuration (server, database, table)
 euis = {}   # Sensor ID (EUI) - Sensor type pairs
 
 class sensor_data:
-    def __init__(self, time, eui, value, unit, sensor_type_id):
+    def __init__(self, time, eui, value, unit, sensor_type_id, sensor_model):
         self.time = time
         self.eui = eui
         self.value = float(value)
         self.unit = unit
         self.sensor_type_id = sensor_type_id
+        self.sensor_model = sensor_model
 
 sdlist = []
 sd_temp = sensor_data 
@@ -32,7 +33,7 @@ def on_message(ws, message):
     
     # Insert sensor data to SQL table
     for i in range(len(sdlist)):
-        log.info("%s | %s, %s, %0.2f, %s, %s" % (jsondata["data"], sdlist[i].time, sdlist[i].eui, float(sdlist[i].value), sdlist[i].unit, sdlist[i].sensor_type_id))
+        log.info("|| %-20s | %-30s || %s, %s, %8.2f, %-4s, %2s ||" % (jsondata["data"], sdlist[i].sensor_model, sdlist[i].time, sdlist[i].eui, float(sdlist[i].value), sdlist[i].unit, sdlist[i].sensor_type_id))
         write_sql(sdlist[i].time, sdlist[i].eui, round(float(sdlist[i].value), 2), sdlist[i].unit, sdlist[i].sensor_type_id)
 
 def decode(time, eui, message):
@@ -41,50 +42,50 @@ def decode(time, eui, message):
     # Reinitialize sensor list
     del sdlist[:]
 
-    sd = sensor_data("", "", 0.0, "", "")
+    sd = sensor_data("", "", 0.0, "", "", "")
     sd.time = time
     sd.eui = eui
     
     # Decode supported sensors only (Rising HF, Digimondo and LS-11x)
     if (euis[eui] == "Rising HF"):
-        log.info("Rising HF - Temperature | %s | %s ", eui, message)
+        # log.info("Rising HF - Temperature | %s | %s ", eui, message)
         # Decoding temperature
         temp = int(message[4:6] + message[2:4], 16) * 175.72 / 65536 - 46.85
-        sdlist.append(sensor_data(sd.time, sd.eui, float(temp), "°C", 1))
+        sdlist.append(sensor_data(sd.time, sd.eui, float(temp), "°C", 1, "Rising HF - Temperature"))
 
         # Decode humidity
-        log.info("Rising HF - Humidity | %s | %s ", eui, message)
+        # log.info("Rising HF - Humidity | %s | %s ", eui, message)
         hum = int(message[6:8], 16)*125/2**8 - 6
-        sdlist.append(sensor_data(sd.time, sd.eui, float(hum), "%RH", 2))
+        sdlist.append(sensor_data(sd.time, sd.eui, float(hum), "%RH", 2, "Rising HF - Humidity"))
 
         # Decode battery percentage
-        log.info("Rising HF - Battery | %s | %s ", eui, message)
+        # log.info("Rising HF - Battery | %s | %s ", eui, message)
         battery = (int(message[16:], 16) + 150) * 0.01 / 3.64
-        sdlist.append(sensor_data(sd.time, sd.eui, float(battery), "%", 3))
+        sdlist.append(sensor_data(sd.time, sd.eui, float(battery), "%", 3, "Rising HF - Battery"))
 
     elif (euis[eui] == "Digimondo"):
-        log.info("Digimondo - Power consumption | %s | %s ", eui, message)
+        # log.info("Digimondo - Power consumption | %s | %s ", eui, message)
         # Decode power consumption
         consumption = int(message[2:8], 16)
-        sdlist.append(sensor_data(sd.time, sd.eui, float(consumption), "kWh", 4))
+        sdlist.append(sensor_data(sd.time, sd.eui, float(consumption), "kWh", 4, "Digimondo - Power consumption"))
 
     elif (euis[eui] == "LS-11x"):
-        log.info("LS-11x - Temperature | %s | %s ", eui, message)
+        # log.info("LS-11x - Temperature | %s | %s ", eui, message)
         # Decoding temperature
         temp = int(message[2:6], 16) / 100
-        sdlist.append(sensor_data(sd.time, sd.eui, float(temp), "°C", 1))
+        sdlist.append(sensor_data(sd.time, sd.eui, float(temp), "°C", 1, "LS-11x - Temperature"))
 
-        log.info("LS-11x - Humidity | %s | %s ", eui, message)
+        # log.info("LS-11x - Humidity | %s | %s ", eui, message)
         # Decoding temperature
         hum = int(message[6:10], 16) / 100
-        sdlist.append(sensor_data(sd.time, sd.eui, float(hum), "%RH", 2))
+        sdlist.append(sensor_data(sd.time, sd.eui, float(hum), "%RH", 2, "LS-11x - Humidity"))
 
-        log.info("LS-11x - Gas density | %s | %s ", eui, message)
+        # log.info("LS-11x - Gas density | %s | %s ", eui, message)
         # Decoding Gas density
         dev_type = ("CO2", "CO", "PM2.5")
         unit = dev_type[int(message[0:2], 16) - 1]
         co2 = int(message[10:], 16)
-        sdlist.append(sensor_data(sd.time, sd.eui, float(co2), unit, 5))
+        sdlist.append(sensor_data(sd.time, sd.eui, float(co2), unit, 5, "LS-11x - Gas density"))
 
 def write_sql(time, eui, value, unit, sensor_type_id):
     # log.info("write_sql()")
