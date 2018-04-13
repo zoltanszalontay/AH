@@ -5,6 +5,7 @@ import logging
 import websocket
 import json
 import pyodbc as odbc
+from pushover import Pushover
 
 sql = {}    # SQL configuration (server, database, table)
 euis = {}   # Sensor ID (EUI) - Sensor type pairs
@@ -100,13 +101,16 @@ def gettime():
 
 def on_open(ws):
     log.info("Web Socket open")
-    
+    push_notification("Web socket open")
+
 def on_close(ws):
     log.info("Web Socket closed")
+    push_notification("Web socket closed")
     exit(1)
 
 def on_error(ws, error):
     log.info("Web Socket error")
+    push_notification("Web socket error")
     print(error)
 
 def write_sql_info():
@@ -119,11 +123,20 @@ def write_sensor_list():
         f.write(json.dumps(euis))
     f.close()
 
+def push_notification(message):
+    msg = po.msg(message)
+    msg.set("AH IoT", "Data streamer")
+    po.send(msg)
+
 if __name__ == "__main__":
 
     log = logging.getLogger(__name__)
     log.setLevel(logging.INFO)
     logging.basicConfig(format='%(asctime)s %(message)s', datefmt='%d/%m/%Y %H:%M')
+
+    # Start push notification
+    po = Pushover("aj2rn8589hxxcjj8aoqayoxp8cffg6") # application key
+    po.user("uenw7rc79czvecd3fsjrms9bm32ucm")       # user key
 
     # Read SQL connection data
     with open('sqlinfo.txt', 'r') as f:
