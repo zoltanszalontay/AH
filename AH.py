@@ -31,7 +31,7 @@ def on_message(ws, message):
     
     # Insert sensor data to SQL table
     for i in range(len(sdlist)):
-        log.info("%s | %s, %s, %f, %s, %s" % (jsondata["data"], sdlist[i].time, sdlist[i].eui, round(float(sdlist[i].value), 2), sdlist[i].unit, sdlist[i].sensor_type_id))
+        log.info("%s | %s, %s, %0.2f, %s, %s" % (jsondata["data"], sdlist[i].time, sdlist[i].eui, float(sdlist[i].value), sdlist[i].unit, sdlist[i].sensor_type_id))
         write_sql(sdlist[i].time, sdlist[i].eui, round(float(sdlist[i].value), 2), sdlist[i].unit, sdlist[i].sensor_type_id)
 
 def decode(time, eui, message):
