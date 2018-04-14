@@ -17,7 +17,7 @@ class sensor_data:
         self.value = float(value)
         self.unit = unit
         self.sensor_type_id = sensor_type_id
-        self.sensor_model = sensor_model
+        self.sensor_model = int(sensor_model)
 
 sdlist = []
 sd_temp = sensor_data 
@@ -33,7 +33,7 @@ def on_message(ws, message):
     
     # Insert sensor data to SQL table
     for i in range(len(sdlist)):
-        log.info("|| %-20s | %-30s || %s, %s, %8.2f, %-4s, %2s ||" % (jsondata["data"], sdlist[i].sensor_model, sdlist[i].time, sdlist[i].eui, float(sdlist[i].value), sdlist[i].unit, sdlist[i].sensor_type_id))
+        log.info("|| %-30s | %-20s || %s, %s, %8.2f, %-4s, %2d ||" % (sdlist[i].sensor_model, jsondata["data"], sdlist[i].time, sdlist[i].eui, float(sdlist[i].value), sdlist[i].unit, sdlist[i].sensor_type_id))
         write_sql(sdlist[i].time, sdlist[i].eui, round(float(sdlist[i].value), 2), sdlist[i].unit, sdlist[i].sensor_type_id)
 
 def decode(time, eui, message):
