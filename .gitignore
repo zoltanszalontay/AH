@@ -104,3 +104,6 @@ ENV/
 app_url.txt
 sensors.txt
 sqlinfo.txt
+pushover.txt
+pushover_prod.txt
+pushover_dev.txt
